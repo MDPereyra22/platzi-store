@@ -52,14 +52,13 @@ export class UsersService {
     return this.userRepository.remove(user);
   }
 
-  async getOrdersByUser(id: number): Promise<Order> {
-    const user: User = await this.findOne(id);
-    return {
-      date: new Date(),
-      user: user,
-      products: await this.productsService.findAll(),
-    };
-  }
+  // async getOrdersByUser(id: number): Promise<Order> {
+  //   const user: User = await this.findOne(id);
+  //   return {
+  //     user: user,
+  //     products: await this.productsService.findAll(),
+  //   };
+  // }
 
   getTasks() {
     return new Promise((resolve, rejects) => {

@@ -1,13 +1,15 @@
+import { User } from './user.entity';
+import { Order } from './order.entity';
 import {
   Column,
   CreateDateColumn,
   Entity,
+  OneToMany,
   OneToOne,
   PrimaryColumn,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { User } from './user.entity';
 
 @Entity()
 export class Customer {
@@ -31,6 +33,9 @@ export class Customer {
   })
   updateAt: Date;
 
-  @OneToOne(() => User, (user) => user.customer,  { nullable: true })
+  @OneToOne(() => User, (user) => user.customer, { nullable: true })
   user: User;
+
+  @OneToMany(() => Order, (order) => order.customer)
+  orders: Order[];
 }
