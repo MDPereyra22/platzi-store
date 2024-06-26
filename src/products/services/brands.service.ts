@@ -1,62 +1,43 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
 import { CreateBrandDto, UpdateBrandDto } from 'src/products/dtos/brand.dto';
 import { Brand } from 'src/products/entities/brand.entity';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class BrandsService {
-  private counterId = 1;
-  private brands: Brand[] = [
-    {
-      id: 1,
-      name: 'Brand 1',
-      image: 'https://i.imgur.com/U4iGx1j.jpeg',
-    },
-  ];
+  constructor(
+    @InjectRepository(Brand) private brandRepository: Repository<Brand>,
+  ) {}
 
-  findAll() : Brand[] {
-    return this.brands
+  async findAll(): Promise<Brand[]> {
+    return await this.brandRepository.find();
   }
 
-  findOne(id:number) : Brand {
-    const brand = this.brands.find((item) => item.id === id)
-
-    if(!brand){
-      throw new NotFoundException('Brand not found')
+  async findOne(id: number): Promise<Brand> {
+    const brand: Brand = await this.brandRepository.findOne({
+      where: { id },
+      relations: { products: true },
+    });
+    if (!brand) {
+      throw new NotFoundException('Brand not found');
     }
-
-    return brand
+    return brand;
   }
 
-  create(payload: CreateBrandDto){
-    this.counterId = this.counterId + 1
-    const newBrand = {
-      id: this.counterId,
-      ...payload
-    }
-
-    this.brands.push(newBrand)
-
-    return newBrand
+  async create(data: CreateBrandDto): Promise<Brand> {
+    const newBrand: Brand = this.brandRepository.create(data);
+    return await this.brandRepository.save(newBrand);
   }
 
-  update(id: number, changes: UpdateBrandDto) {
-    const brand = this.findOne(id)
-    const index = this.brands.findIndex((item) => item.id === id)
-
-    this.brands[index] = {
-      ...brand,
-      ...changes
-    }
-
-    return this.brands[index]
+  async update(id: number, changes: UpdateBrandDto): Promise<Brand> {
+    const brand: Brand = await this.findOne(id);
+    this.brandRepository.merge(brand, changes);
+    return this.brandRepository.save(changes);
   }
 
-  remove(id: number){
-    const index = this.brands.findIndex((item)=> item.id === id)
-    if(index === -1){
-      throw new NotFoundException('Brand is not found')
-    }
-    this.brands.splice(index, 1)
-    return true
+  async remove(id: number) {
+    const brand: Brand = await this.findOne(id);
+    return this.brandRepository.remove(brand);
   }
 }

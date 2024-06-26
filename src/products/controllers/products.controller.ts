@@ -45,8 +45,27 @@ export class ProductsController {
     return this.productsService.update(id, changes);
   }
 
+  @Put(':id/category/:categoryId')
+  updateCategoryByProduct(
+    @Param('id', ParseIntPipe) id: number,
+    @Param('categoryId', ParseIntPipe) categoryId: number,
+  ){
+    return this.productsService.updateCategoryByProduct(id, categoryId)
+  }
+
+
   @Delete(':id')
-  delete(@Param('id') id: number): Promise<Product> {
+  delete(@Param('id', ParseIntPipe) id: number): Promise<Product> {
     return this.productsService.remove(id);
   }
+
+  @Delete(':id/category/:categoryId')
+  removeCategoryByProdyct(
+    @Param('id', ParseIntPipe) id: number,
+    @Param('categoryId', ParseIntPipe) categoryId: number,
+  ): Promise<Product> {
+    return this.productsService.removeCategoryByProdyct(id, categoryId);
+  }
+
+
 }

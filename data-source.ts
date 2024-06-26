@@ -7,7 +7,7 @@ export const dataSourceOptions: DataSourceOptions = {
   username: 'root',
   password: '123456',
   database: 'my_db',
-  migrations: ['dist/migrations/*.js'], // Asegúrate de compilar tus migraciones a .js
+  migrations: ['dist/src/database/migrations/*.js'], // Asegúrate de compilar tus migraciones a .js
   entities: ['dist/**/*.entity.js'],
    // También compila tus entidades a .js
 };
