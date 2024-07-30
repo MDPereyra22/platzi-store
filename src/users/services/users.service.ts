@@ -1,6 +1,7 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Client } from 'pg';
+import * as bcrypt from "bcrypt"
 
 import { User } from '../entities/user.entity';
 import { CreateUserDto, UpdateUserDto } from 'src/users/dtos/user.dto';
@@ -14,9 +15,6 @@ import { CustomersService } from './customers.service';
 export class UsersService {
   constructor(
     @InjectRepository(User) private userRepository: Repository<User>,
-    @Inject('PG') private clientPg: Client,
-    private productsService: ProductsService,
-    private configService: ConfigService,
     private customerService: CustomersService,
   ) {}
 
@@ -34,11 +32,21 @@ export class UsersService {
 
   async create(data: CreateUserDto): Promise<User> {
     const newUser: User = this.userRepository.create(data);
+    const hashedPassword = await bcrypt.hash(newUser.password, 10)
+    newUser.password = hashedPassword
     if (data.customerId) {
       const customer = await this.customerService.findOne(data.customerId);
       newUser.customer = customer;
     }
     return await this.userRepository.save(newUser);
+  }
+
+  async findByEmail(email: string) : Promise<User>{
+    const user : User  = await this.userRepository.findOne({where:{email}})
+    if(!user){
+      throw new NotFoundException('Usuario no encontrado')
+    }
+    return user
   }
 
   async update(id: number, changes: UpdateUserDto): Promise<User> {
@@ -60,14 +68,5 @@ export class UsersService {
   //   };
   // }
 
-  getTasks() {
-    return new Promise((resolve, rejects) => {
-      this.clientPg.query('SELECT * FROM tasks', (err, res) => {
-        if (err) {
-          rejects(err);
-        }
-        resolve(res.rows);
-      });
-    });
-  }
+
 }

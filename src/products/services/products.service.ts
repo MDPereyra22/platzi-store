@@ -2,10 +2,11 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
   CreateProductDto,
+  FilterProductsDto,
   UpdateProductDto,
 } from 'src/products/dtos/products.dto';
 import { Product } from 'src/products/entities/product.entity';
-import { In, Repository } from 'typeorm';
+import { Between, FindOptionsWhere, In, Repository } from 'typeorm';
 import { BrandsService } from './brands.service';
 import { Category } from '../entities/category.entity';
 import { Brand } from '../entities/brand.entity';
@@ -19,8 +20,22 @@ export class ProductsService {
     @InjectRepository(Brand) private brandsRepository: Repository<Brand>,
   ) {}
 
-  async findAll(): Promise<Product[]> {
-    return await this.productRepository.find();
+  async findAll(params?: FilterProductsDto): Promise<Product[]> {
+    if (params) {
+      const where : FindOptionsWhere<Product>= {}
+      const { limit, offset } = params;
+      const { maxPrice, minPrice } = params;
+      if(minPrice && maxPrice){
+        where.price = Between(minPrice, maxPrice)
+      }
+      return await this.productRepository.find({
+        where,
+        relations: ['brand'],
+        take: limit,
+        skip: offset,
+      });
+    }
+    return await this.productRepository.find({ relations: ['brand'] });
   }
 
   async findOne(id: number): Promise<Product> {
@@ -103,9 +118,9 @@ export class ProductsService {
     if (!category) {
       throw new NotFoundException('Category not found');
     }
-    product.categories.push(category)
+    product.categories.push(category);
 
-    console.log(product)
+    console.log(product);
     return this.productRepository.save(product);
   }
 

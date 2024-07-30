@@ -9,6 +9,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { Customer } from './customer.entity';
+import { Exclude } from 'class-transformer';
 
 @Entity()
 export class User {
@@ -16,6 +17,7 @@ export class User {
   id: number;
   @Column({ type: 'varchar', length: 255 })
   email: string;
+  @Exclude()
   @Column({ type: 'varchar', length: 255 })
   password: string;
   @Column({ type: 'varchar', length: 100 })
@@ -34,6 +36,6 @@ export class User {
   updateAt: Date;
 
   @OneToOne(() => Customer, (customer) => customer.user, { nullable: true })
-  @JoinColumn()
+  @JoinColumn({name:'customer_id'})
   customer: Customer;
 }
